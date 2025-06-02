@@ -24,8 +24,8 @@ Check it Live here:
 - Loading states during AI processing
 - Error handling in the chat interface
 - Navigation bar with chat history grouped by date
-<!-- - GitHub and Google authentication (using Vercel auth) -->
-<!-- - Store chat history per user (using Vercel KV) -->
+  <!-- - GitHub and Google authentication (using Vercel auth) -->
+  <!-- - Store chat history per user (using Vercel KV) -->
 
 ## Project objective
 
@@ -38,16 +38,7 @@ The main objective of this project is to show some development skills through so
 - TypeScript
 - Tailwind 4
 - Shadcn UI
-<!-- - Vercel KV -->
-<!-- - Vercel Auth -->
-<!-- - Unity tests (Jest + React Testing Library) -->
-<!-- - Linters (eslint, style-lint, lint-staged) -->
-<!-- - Formatters (editorconfig, prettier) -->
-<!-- - git hooks (husky: pre-commit, prepare-commit-message) -->
-<!-- - conventional-commits (commitizen) -->
-<!-- - Scaffolding (scaffdog) -->
 - Environment config (.vscode/\*, .npmrc, .nvmrc, etc)
-<!-- - Thematization -->
 - Usability
 - Responsivity
 - Clean Code
@@ -55,15 +46,24 @@ The main objective of this project is to show some development skills through so
 - KISS: “Keep It Simple, Stupid!”
 - YAGNI: “You Ain’t gonna need it”
 - DRY: “Do not Repeat Yourself”
+  <!-- - Vercel KV -->
+  <!-- - Vercel Auth -->
+  <!-- - Unity tests (Jest + React Testing Library) -->
+  <!-- - Linters (eslint, style-lint, lint-staged) -->
+  <!-- - Formatters (editorconfig, prettier) -->
+  <!-- - git hooks (husky: pre-commit, prepare-commit-message) -->
+  <!-- - conventional-commits (commitizen) -->
+  <!-- - Scaffolding (scaffdog) -->
+  <!-- - Thematization -->
 
 ## Architecture decisions
 
 - Started with the basic template from Next.js
 - Kept `/app` separated from `/src` to keep the app structure clean
 - Used Shadcn UI + Tailwind CSS for the UI components for a fast development
-<!-- - Used Atomic Design folder structure for the components -->
 - Used Vercel AI SDK for AI processing
-<!-- - Used Vercel KV and Vercel Auth for storage and authentication to do not depend on external services -->
+  <!-- - Used Atomic Design folder structure for the components -->
+  <!-- - Used Vercel KV and Vercel Auth for storage and authentication to do not depend on external services -->
 
 ## Design decisions
 
@@ -81,11 +81,12 @@ The main objective of this project is to show some development skills through so
 - [x] Clone the basic template from Next.js
 - [x] Organize the project README.md with the project development plan
 - [x] Improve the basic config files for better code quality control
-- [ ] Create a chat interface page using Vercel AI SDK to make the chat interactive, with file upload feature
-  - [ ] Create a chat message component
-  - [ ] Create a chat textarea component
+- [ ] Create a chat interface page, with file upload feature
+  - [ ] Create a chat message component that differentiates between user and AI messages
   - [ ] Create a chat messages history component
+  - [ ] Create a chat textarea component
   - [ ] Create a chat file upload button component
+  - [ ] Mock data for the chat messages history
 - Implement the chat interactivity using Vercel AI SDK + OpenAI
   - [ ] Create a Server Action to send the user message with the file attachment and receive the AI generated text (using Vercel AI SDK for AI streaming + OpenAI)
   - [ ] Create a Tool in the Server Action to extract PII (Personal Identifiable Information)
@@ -120,5 +121,5 @@ The main objective of this project is to show some development skills through so
 - Prettier formating: `npm run format`
 - Linting code: `npm run lint`
 - Build: `npm run build`
-<!-- - Tests: `npm run test` -->
-<!-- - Scaffolding: `npm run g` -->
+  <!-- - Tests: `npm run test` -->
+  <!-- - Scaffolding: `npm run g` -->

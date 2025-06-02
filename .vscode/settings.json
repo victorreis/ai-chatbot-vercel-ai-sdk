@@ -19,8 +19,6 @@
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
   "editor.codeActionsOnSave": {
-    "source.formatDocument": "explicit",
-    "source.fixAll.format": "explicit",
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
   },
@@ -173,20 +171,16 @@
     }
   },
   "[javascript]": {
-    // "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[javascriptreact]": {
-    // "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[typescript]": {
-    // "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[typescriptreact]": {
-    // "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
