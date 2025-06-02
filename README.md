@@ -80,7 +80,7 @@ The main objective of this project is to show some development skills through so
 
 - [x] Clone the basic template from Next.js
 - [x] Organize the project README.md with the project development plan
-- [ ] Improve the basic config files for better code quality control
+- [x] Improve the basic config files for better code quality control
 - [ ] Create a chat interface page using Vercel AI SDK to make the chat interactive, with file upload feature
   - [ ] Create a chat message component
   - [ ] Create a chat textarea component
