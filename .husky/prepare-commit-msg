@@ -1,14 +1,15 @@
-# Only run commitizen for non-merge commits
+# Skip commitizen for merge commits
 case "$2" in
   merge|squash)
     exit 0
     ;;
 esac
 
-# Check if this is a commit with -m flag
+# Skip commitizen if commit message was provided with -m flag
 if [ "$2" = "message" ]; then
   exit 0
 fi
 
-# Run commitizen
+# Run commitizen for interactive commit message
+echo "📝 Preparing commit message with Commitizen..."
 exec < /dev/tty && npx cz --hook || true

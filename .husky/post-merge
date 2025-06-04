@@ -8,7 +8,7 @@ check_run() {
 check_run "package.json" "echo '📦 package.json changed. Run \"npm install\" to update dependencies.'"
 
 # If database schema changed, remind to run migrations
-check_run "prisma/schema.prisma" "echo '🗄️  Database schema changed. Run \"npm run db:migrate\" to update your database.'"
+check_run "prisma/schema.prisma" "echo '🗄️ Database schema changed. Run \"npm run db:migrate\" to update your database.'"
 
 # If .env.example changed, remind to check environment variables
 check_run ".env.example" "echo '🔐 .env.example changed. Check if you need to update your .env.local file.'"

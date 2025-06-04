@@ -1,15 +1,12 @@
-echo "Running pre-push checks..."
+echo -e "🚀 Starting pre-commit checks...\n"
 
-# Run type-check
-echo "Running type-check..."
+echo -e "\n📝 Type checking..."
 npm run type-check
 
-# Run tests
-echo "Running tests..."
+echo -e "\n🧪 Running tests..."
 npm test -- --passWithNoTests --ci --watchAll=false
 
-# Run lint-staged
-echo "Running lint-staged..."
+echo -e "\n🎨 Running lint-staged (formatting & linting)..."
 npx lint-staged
 
-echo "✅ All pre-commit checks passed!"
+echo -e "\n✅ All pre-commit checks passed! Ready to commit."

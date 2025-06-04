@@ -1,9 +1,9 @@
-echo "Running pre-push checks..."
+echo -e "🚀 Starting pre-push checks...\n"
 
-echo "Type checking..."
+echo -e "\n📝 Type checking..."
 npm run type-check
 
-echo "Running tests..."
+echo -e "\n🧪 Running tests..."
 npm test -- --passWithNoTests --ci --watchAll=false
 
-echo "✅ All pre-push checks passed!"
+echo -e "\n✅ All pre-push checks passed! Ready to push."
