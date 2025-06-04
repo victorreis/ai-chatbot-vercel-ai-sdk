@@ -1,0 +1,14 @@
+# Only run commitizen for non-merge commits
+case "$2" in
+  merge|squash)
+    exit 0
+    ;;
+esac
+
+# Check if this is a commit with -m flag
+if [ "$2" = "message" ]; then
+  exit 0
+fi
+
+# Run commitizen
+exec < /dev/tty && npx cz --hook || true

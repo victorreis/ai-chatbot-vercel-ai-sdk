@@ -1,0 +1,9 @@
+echo "Running pre-push checks..."
+
+echo "Type checking..."
+npm run type-check
+
+echo "Running tests..."
+npm test -- --passWithNoTests --ci --watchAll=false
+
+echo "✅ All pre-push checks passed!"

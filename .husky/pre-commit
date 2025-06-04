@@ -1,0 +1,15 @@
+echo "Running pre-push checks..."
+
+# Run type-check
+echo "Running type-check..."
+npm run type-check
+
+# Run tests
+echo "Running tests..."
+npm test -- --passWithNoTests --ci --watchAll=false
+
+# Run lint-staged
+echo "Running lint-staged..."
+npx lint-staged
+
+echo "✅ All pre-commit checks passed!"
