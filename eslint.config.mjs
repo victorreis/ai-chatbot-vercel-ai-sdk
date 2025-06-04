@@ -1,20 +1,21 @@
 import { FlatCompat } from "@eslint/eslintrc";
-// import pluginJest from "eslint-plugin-jest";
 import pluginJs from "@eslint/js";
 import pluginNext from "@next/eslint-plugin-next";
 import configPrettier from "eslint-config-prettier";
 import { flatConfigs as pluginImport } from "eslint-plugin-import";
 import pluginImportHelpers from "eslint-plugin-import-helpers";
+import pluginJest from "eslint-plugin-jest";
+import pluginJestDom from "eslint-plugin-jest-dom";
 import pluginJsxA11y from "eslint-plugin-jsx-a11y";
 import pluginPrettier from "eslint-plugin-prettier";
-import pluginPromise from "eslint-plugin-promise";
+import * as pluginPromise from "eslint-plugin-promise";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginSonarjs from "eslint-plugin-sonarjs";
 import pluginStorybook from "eslint-plugin-storybook";
-// Tailwind CSS v4 is not compatible with eslint-plugin-tailwindcss (requires v3.4.0+)
-import pluginTurbo from "eslint-plugin-turbo";
-// import pluginUnicorn from "eslint-plugin-unicorn"; // Temporarily disabled due to compatibility issues
+import pluginTestingLibrary from "eslint-plugin-testing-library";
+import * as pluginTurbo from "eslint-plugin-turbo";
+import * as pluginUnicorn from "eslint-plugin-unicorn";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -55,18 +56,18 @@ export default [
   configPrettier,
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  pluginTurbo.configs["flat/recommended"],
+  pluginTurbo.default.configs["flat/recommended"],
+  pluginUnicorn.default.configs["flat/recommended"],
   pluginImport.recommended,
   pluginImport.react,
   pluginImport.typescript,
-  pluginPromise.configs["flat/recommended"],
+  pluginPromise.default.configs["flat/recommended"],
   ...compat.extends("next/typescript"),
 
   {
     plugins: {
       prettier: pluginPrettier,
       sonarjs: pluginSonarjs,
-      // unicorn: pluginUnicorn, // Temporarily disabled due to compatibility issues
       "import-helpers": pluginImportHelpers,
     },
     settings: {
@@ -123,17 +124,25 @@ export default [
       "no-return-await": "error",
       "prettier/prettier": "error",
       "turbo/no-undeclared-env-vars": "warn",
-      // "unicorn/no-null": "off",
-      // "unicorn/prefer-global-this": "off",
-      // "unicorn/prefer-module": "off",
-      // "unicorn/prevent-abbreviations": "off",
+      "unicorn/no-null": "off",
+      "unicorn/prefer-global-this": "off",
+      "unicorn/prefer-module": "off",
+      "unicorn/prevent-abbreviations": "off",
+      "unicorn/filename-case": [
+        "error",
+        {
+          cases: {
+            camelCase: true,
+            pascalCase: true,
+            kebabCase: true,
+          },
+        },
+      ],
       eqeqeq: ["error", "smart"],
     },
   },
 
   //! REACT CONFIGS
-  // ...pluginTailwindcss.configs["flat/recommended"],
-
   {
     ...pluginReact.configs.flat.recommended,
     languageOptions: {
@@ -154,7 +163,6 @@ export default [
     plugins: {
       "jsx-a11y": pluginJsxA11y,
       "react-hooks": pluginReactHooks,
-      // tailwindcss: pluginTailwindcss,
       storybook: pluginStorybook,
     },
 
@@ -169,40 +177,48 @@ export default [
       "react/react-in-jsx-scope": "off",
     },
   },
+  ...pluginStorybook.configs["flat/recommended"],
 
   //! REACT CONFIGS - tests
   {
-    files: ["**/*.spec.{js,mjs,cjs,jsx,ts,tsx}"],
+    files: [
+      "**/*.test.{js,mjs,cjs,jsx,ts,tsx}",
+      "**/*.spec.{js,mjs,cjs,jsx,ts,tsx}",
+    ],
+    plugins: {
+      jest: pluginJest,
+      "jest-dom": pluginJestDom,
+      "testing-library": pluginTestingLibrary,
+    },
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+    rules: {
+      ...pluginJest.configs.all.rules,
+      ...pluginTestingLibrary.configs.react.rules,
+      ...pluginJestDom.configs.recommended.rules,
+      "jest/max-expects": "off",
+      "jest/no-conditional-expect": "off",
+      "jest/no-conditional-in-test": "off",
+      "jest/no-hooks": "off",
+      "jest/no-untyped-mock-factory": "off",
+      "jest/prefer-importing-jest-globals": "off",
+      "jest/require-hook": "off",
+      "jest/unbound-method": "off",
+      "react/react-in-jsx-scope": "off",
+      "testing-library/await-async-query": "off",
+      "testing-library/no-await-sync-query": "off",
+      "testing-library/no-container": "off",
+      "testing-library/no-debugging-utils": "error",
+      "testing-library/no-node-access": [
+        "error",
+        { allowContainerFirstChild: true },
+      ],
+      "testing-library/prefer-screen-queries": "off",
+    },
   },
-  // Jest and Testing Library configs commented out as testing is not implemented yet
-  // pluginJest.configs["flat/all"],
-  // pluginTestingLibrary.configs["flat/react"],
-  // {
-  //   plugins: { jest: pluginJest },
-  //   languageOptions: {
-  //     globals: pluginJest.environments.globals.globals,
-  //   },
-  //   rules: {
-  //     "jest/max-expects": "off",
-  //     "jest/no-conditional-expect": "off",
-  //     "jest/no-conditional-in-test": "off",
-  //     "jest/no-hooks": "off",
-  //     "jest/no-untyped-mock-factory": "off",
-  //     "jest/prefer-importing-jest-globals": "off",
-  //     "jest/require-hook": "off",
-  //     "jest/unbound-method": "off",
-  //     "react/react-in-jsx-scope": "off",
-  //     "testing-library/await-async-query": "off",
-  //     "testing-library/no-await-sync-query": "off",
-  //     "testing-library/no-container": "off",
-  //     "testing-library/no-debugging-utils": "error",
-  //     "testing-library/no-node-access": [
-  //       "error",
-  //       { allowContainerFirstChild: true },
-  //     ],
-  //     "testing-library/prefer-screen-queries": "off",
-  //   },
-  // },
 
   //! NEXT CONFIGS
   {
