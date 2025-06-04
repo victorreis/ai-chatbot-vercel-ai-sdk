@@ -27,7 +27,6 @@ reports
 
 # compiled output
 dist
-lib
 tmp
 out
 out-tsc

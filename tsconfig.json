@@ -2,17 +2,11 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": [
     ".next/types/**/*.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.mjs",
-    "**/*.cjs",
-    "next-env.d.ts",
-    "next.config.*",
-    "eslint.config.*",
-    "globals.d.ts",
-    "types/**/*.d.ts"
+    "app/**/*",
+    "src/**/*",
+    "*.config.*",
+    "*.setup.*",
+    "*.d.ts"
   ],
   "exclude": [
     ".next",
@@ -54,7 +48,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"],
-      "@app/*": ["./app/*"]
+      "@app/*": ["./app/*"],
+      "@/env": ["./src/env.mjs"]
     },
     "rootDirs": [],
     "typeRoots": ["./node_modules/@types"],
