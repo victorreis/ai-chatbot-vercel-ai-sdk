@@ -1,27 +1,149 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": [
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.mjs",
+    "**/*.cjs",
+    "next-env.d.ts",
+    "next.config.*",
+    "eslint.config.*",
+    "globals.d.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": [
+    ".next",
+    ".vercel",
+    ".yarn",
+    "build",
+    "coverage",
+    "dist",
+    "node_modules",
+    "out",
+    "storybook-static",
+    "public/sw*",
+    "tmp"
+  ],
+  "compileOnSave": true,
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
+    //#region //! Project
+    "incremental": true,
+    "composite": false,
+    "tsBuildInfoFile": "./.next/cache/tsbuildinfo",
+    "disableSourceOfProjectReferenceRedirect": false,
+    "disableSolutionSearching": false,
+    "disableReferencedProjectLoad": false,
+    //#endregion
+
+    //#region //! Language and Environment
+    "target": "ES2023",
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "jsx": "preserve",
+    "experimentalDecorators": false,
+    "noLib": false,
+    "useDefineForClassFields": true,
+    "moduleDetection": "auto",
+    //#endregion
+
+    //#region //! Modules
     "module": "esnext",
     "moduleResolution": "bundler",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@app/*": ["./app/*"]
+    },
+    "rootDirs": [],
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node", "react", "react-dom", "jest"],
+    "allowUmdGlobalAccess": false,
+    "moduleSuffixes": [],
+    "allowImportingTsExtensions": false,
+    "resolvePackageJsonExports": true,
+    "resolvePackageJsonImports": true,
+    "customConditions": [],
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "allowArbitraryExtensions": false,
+    "noResolve": false,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": ["./*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+    //#endregion
+
+    //#region //! JavaScript Support
+    "allowJs": true,
+    "checkJs": true,
+    "maxNodeModuleJsDepth": 0,
+    //#endregion
+
+    //#region //! Emit
+    "declaration": false,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "removeComments": false,
+    "noEmit": true,
+    "importHelpers": false,
+    "downlevelIteration": true,
+    "inlineSources": false,
+    "emitBOM": false,
+    "newLine": "lf",
+    "stripInternal": false,
+    "noEmitHelpers": false,
+    "noEmitOnError": false,
+    "preserveValueImports": false,
+    "preserveWatchOutput": true,
+    "emitDecoratorMetadata": false,
+    "noErrorTruncation": true,
+    "pretty": true,
+    //#endregion
+
+    //#region //! Interop Constraints
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "isolatedDeclarations": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "preserveSymlinks": false,
+    "forceConsistentCasingInFileNames": true,
+    //#endregion
+
+    //#region //! Type Checking
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "noUncheckedSideEffectImports": false,
+    //#endregion
+
+    //#region //! Completeness
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    //#endregion
+
+    //#region //! Watch Options
+    "assumeChangesOnlyAffectDirectDependencies": false
+    //#endregion
+  }
 }

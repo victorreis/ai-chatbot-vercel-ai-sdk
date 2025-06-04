@@ -82,7 +82,7 @@ The main objective of this project is to show some development skills through so
 - [x] Learn about Vercel AI SDK. (2 hours)
 - [x] Clone the basic template from Next.js. (1 min)
 - [x] Organize the project README.md with the project development plan. (2 hours)
-- [x] Improve the basic config files for better code quality control. (40 min)
+- [x] Improve the basic config files for better code quality control. (2 hours)
 - [ ] Create a chat interface page, with file upload feature.
   - [ ] Create a chat message component that differentiates between user and AI messages.
   - [ ] Create a chat messages history component.

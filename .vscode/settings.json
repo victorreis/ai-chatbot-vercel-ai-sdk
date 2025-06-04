@@ -156,9 +156,6 @@
     ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
     ["twMerge\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
-  "editor.quickSuggestions": {
-    "strings": true
-  },
   //#endregion
   //#region //! FILE EXTENSION SPECIFIC OVERRIDES
   "files.associations": {

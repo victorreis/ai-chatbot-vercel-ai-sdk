@@ -14,10 +14,10 @@ import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginSonarjs from "eslint-plugin-sonarjs";
 import pluginStorybook from "eslint-plugin-storybook";
 import pluginTestingLibrary from "eslint-plugin-testing-library";
-import * as pluginTurbo from "eslint-plugin-turbo";
 import * as pluginUnicorn from "eslint-plugin-unicorn";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+// import * as pluginTurbo from "eslint-plugin-turbo";
 
 const ignoreConfig = [
   {
@@ -41,7 +41,7 @@ const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
  *
  */
 export default [
-  //! BASE CONFIGS
+  //#region //! BASE CONFIGS
   {
     files: [
       "**/*.{js,mjs,cjs,jsx,ts,tsx}",
@@ -56,7 +56,7 @@ export default [
   configPrettier,
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  pluginTurbo.default.configs["flat/recommended"],
+  // pluginTurbo.default.configs["flat/recommended"], // Not needed - not a Turborepo project
   pluginUnicorn.default.configs["flat/recommended"],
   pluginImport.recommended,
   pluginImport.react,
@@ -123,7 +123,7 @@ export default [
       ],
       "no-return-await": "error",
       "prettier/prettier": "error",
-      "turbo/no-undeclared-env-vars": "warn",
+      // "turbo/no-undeclared-env-vars": "warn",
       "unicorn/no-null": "off",
       "unicorn/prefer-global-this": "off",
       "unicorn/prefer-module": "off",
@@ -141,12 +141,13 @@ export default [
       eqeqeq: ["error", "smart"],
     },
   },
+  //#endregion
 
-  //! REACT CONFIGS
+  //#region //! REACT CONFIGS
   {
     ...pluginReact.configs.flat.recommended,
     languageOptions: {
-      ...pluginReact.configs.flat.recommended.languageOptions,
+      ...pluginReact.configs.flat.recommended?.languageOptions,
       globals: {
         ...globals.browser,
         ...globals.es2025,
@@ -178,8 +179,9 @@ export default [
     },
   },
   ...pluginStorybook.configs["flat/recommended"],
+  //#endregion
 
-  //! REACT CONFIGS - tests
+  //#region //! REACT CONFIGS - tests
   {
     files: [
       "**/*.test.{js,mjs,cjs,jsx,ts,tsx}",
@@ -219,15 +221,16 @@ export default [
       "testing-library/prefer-screen-queries": "off",
     },
   },
+  //#endregion
 
-  //! NEXT CONFIGS
+  //#region //! NEXT CONFIGS
   {
     plugins: {
       "@next/next": pluginNext,
     },
     rules: {
-      ...pluginNext.configs.recommended.rules,
-      ...pluginNext.configs["core-web-vitals"].rules,
+      ...pluginNext.configs?.recommended?.rules,
+      ...pluginNext.configs?.["core-web-vitals"]?.rules,
 
       // "no-restricted-imports": [
       //   "error",
@@ -248,4 +251,5 @@ export default [
       // ],
     },
   },
+  //#endregion
 ];
