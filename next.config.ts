@@ -2,7 +2,6 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Strict React mode for better development experience
   reactStrictMode: true,
 
   // Security headers
@@ -40,24 +39,23 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Image optimization
   images: {
     domains: [], // Add external image domains as needed
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-
-  // Experimental features
   experimental: {
-    // Enable server actions (for AI chatbot functionality)
     serverActions: {
       bodySizeLimit: "2mb", // Increase for file uploads
     },
-    // Optimize CSS
     optimizeCss: true,
-    // Typed routes
-    typedRoutes: true,
+    // typedRoutes: true,
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
 
   // Performance optimizations
@@ -67,27 +65,20 @@ const nextConfig: NextConfig = {
   // Build optimizations
   productionBrowserSourceMaps: false, // Disable source maps in production
 
-  // Logging
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
-
-  // Redirects
   async redirects() {
     return [];
   },
 
-  // Rewrites
   async rewrites() {
     return [];
   },
 };
 
 // Bundle analyzer configuration
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
+// Only apply when ANALYZE is set to avoid conflicts with Turbopack
+const config =
+  process.env.ANALYZE === "true"
+    ? bundleAnalyzer({ enabled: true })(nextConfig)
+    : nextConfig;
 
-export default withBundleAnalyzer(nextConfig);
+export default config;
