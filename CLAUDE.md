@@ -217,6 +217,7 @@ AUTH_SECRET=
 - Write tests for new functionality
 - Use meaningful commit messages (conventional commits)
 - **NEVER** create a redundant comment that says the same as the variable/function/class name, like
+- **ALWAYS** use `expect.assertions(<number of assertions>)` as the first expression in a test
 
 ```typescript
 // Card styles
