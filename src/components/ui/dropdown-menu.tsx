@@ -67,12 +67,13 @@ export function DropdownMenu({
       {open && (
         <div
           className={cn(
-            "glass text-popover-foreground border-border/50 soft-shadow animate-in fade-in-0 zoom-in-95 absolute z-50 min-w-[8rem] overflow-hidden rounded-lg border p-1 shadow-xl",
+            "text-popover-foreground border-border/50 soft-shadow animate-in fade-in-0 zoom-in-95 bg-popover absolute z-50 min-w-[8rem] cursor-default overflow-hidden rounded-lg border p-1 shadow-xl",
             align === "start" && "left-0",
             align === "center" && "left-1/2 -translate-x-1/2",
             align === "end" && "right-0",
             className,
           )}
+          onClick={(e) => e.stopPropagation()}
           ref={dropdownRef}
           style={{ top: `calc(100% + ${sideOffset}px)` }}
         >
@@ -95,7 +96,7 @@ export function DropdownMenuItem({
         "relative flex cursor-pointer items-center rounded-md px-2 py-1.5 text-sm transition-all duration-200 outline-none select-none",
         destructive
           ? "text-destructive hover:bg-destructive/10 hover:text-destructive"
-          : "hover:bg-accent/50 hover:text-accent-foreground",
+          : "hover:bg-accent hover:text-accent-foreground",
         className,
       )}
       onClick={onClick}
