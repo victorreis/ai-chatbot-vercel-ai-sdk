@@ -83,22 +83,27 @@ The main objective of this project is to show some development skills through so
 - [x] Clone the basic template from Next.js. (1 min)
 - [x] Organize the project README.md with the project development plan. (2 hours)
 - [x] Improve the basic config files for better code quality control. (3 hours)
-- [ ] Create a chat interface page, with file upload feature.
-  - [ ] Create a chat message component that differentiates between user and AI messages.
-  - [ ] Create a chat messages history component.
-  - [ ] Create a chat textarea component.
-  - [ ] Create a chat file upload button component.
-  - [ ] Mock data for the chat messages history.
-- Implement the chat interactivity using Vercel AI SDK + OpenAI.
+- [x] UI Development. (8 hours, I played a lot with the design, very fun!)
+  - [x] Create a navigation bar in the left portion of the screen:
+    - [x] Create a chat message component that differentiates between user and AI messages by background color.
+    - [x] Create a chat messages history component that differentiates between user and AI messages by left/right alignment. It shows the timestamp.
+    - [x] Create a chat textarea component with floating buttons for file upload and send.
+    - [x] Create a chat bar on top of the screen with the chat title on the the right: the user name and the theme switcher.
+    - [x] Implement auto-scroll to bottom when new messages are added.
+  - [x] Create a chat interface page, with file upload feature on the right portion of it:
+    - [x] Create a navigation bar component with the title "AI Chatbot".
+    - [x] Create a "New Chat" button below the title.
+    - [x] Create a list of chat titles below the "New Chat" button and group chat titles by date (Today, Yesterday, 2 days ago, etc).
+    - [x] Create a dropdown menu for the chat titles list with the options to rename and delete the chat.
+    - [x] Mock data for the chat messages history.
+  - [x] Modern scrollbar styles
+  - [x] Theme switcher (dark/light/system)
+- [ ] Implement the chat interactivity using Vercel AI SDK + OpenAI.
   - [ ] Create a Server Action to send the user message with the file attachment and receive the AI generated text (using Vercel AI SDK for AI streaming + OpenAI).
   - [ ] Create a Tool in the Server Action to extract PII (Personal Identifiable Information).
   - [ ] Show appropriate loading states during AI processing.
   - [ ] Display when tool actions are being executed (loading state).
   - [ ] Add Error handling in the chat interface when the user message is empty, a server/tool error occurs, when the file attachment is not a PDF or image, when the information in the image/PDF is not valid etc.
-- [ ] Create a navigation bar in the left portion of the screen with the title "AI Chatbot \[Vercel AI SDK\]" and a list of chat histories with "Guest chat" selected by default.
-  - [ ] Create a navigation bar component with a title.
-  - [ ] Create a navigation bar chat item component.
-  - [ ] Group chat items by date.
 - [ ] Use Vercel KV for storage.
 - [ ] Use Vercel Auth for authentication.
 - [ ] Add unit tests.
