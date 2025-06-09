@@ -46,7 +46,7 @@ export default [
     files: [
       "**/*.{js,mjs,cjs,jsx,ts,tsx}",
       "**/*/next-env.d.ts",
-      "**/*/.config.{js,mjs,cjs,jsx,ts,tsx}",
+      "**/*/*.config.{js,mjs,cjs,jsx,ts,tsx}",
       "**/*/.plop/**/*",
       "**/*/.storybook/**/*",
     ],

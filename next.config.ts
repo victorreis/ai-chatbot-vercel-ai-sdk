@@ -66,7 +66,13 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false, // Disable source maps in production
 
   async redirects() {
-    return [];
+    return [
+      {
+        source: "/",
+        destination: "/chat",
+        permanent: false,
+      },
+    ];
   },
 
   async rewrites() {
