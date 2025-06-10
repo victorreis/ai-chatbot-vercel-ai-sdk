@@ -35,6 +35,7 @@ const piiDetectionTool = {
   parameters: z.object({
     attachmentIndex: z
       .number()
+      .min(1)
       .describe(
         "The index of the attachment in the user's message to analyze (0-based)",
       ),

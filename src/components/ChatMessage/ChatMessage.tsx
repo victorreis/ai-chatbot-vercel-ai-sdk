@@ -1,5 +1,6 @@
 "use client";
 
+import { Paperclip } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/utils/cn";
@@ -87,8 +88,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {message.attachments && message.attachments.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {message.attachments.map((attachment, index) => (
-              <span className={messageStyles.attachment} key={index}>
-                📎 {attachment.name}
+              <span
+                className="text-muted-foreground bg-muted flex items-center gap-1 rounded px-2 py-1 text-xs"
+                key={index}
+              >
+                <Paperclip className="h-3 w-3" />
+                {attachment.name}
               </span>
             ))}
           </div>

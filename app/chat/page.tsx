@@ -85,19 +85,22 @@ export default function ChatPage() {
           content: msg.content,
           role: msg.role as "user" | "assistant",
           timestamp: new Date(msg.createdAt || Date.now()),
-          attachments: msg.experimental_attachments?.map(
-            (att: {
-              name?: string;
-              pathname?: string;
-              contentType?: string;
-              url?: string;
-            }) => ({
-              name: att.name || att.pathname || "attachment",
-              type: att.contentType || "application/octet-stream",
-              size: 0,
-              url: att.url,
-            }),
-          ),
+          attachments:
+            msg.role === "user"
+              ? msg.experimental_attachments?.map(
+                  (att: {
+                    name?: string;
+                    pathname?: string;
+                    contentType?: string;
+                    url?: string;
+                  }) => ({
+                    name: att.name || att.pathname || "attachment",
+                    type: att.contentType || "application/octet-stream",
+                    size: 0,
+                    url: att.url,
+                  }),
+                )
+              : undefined,
         }))
       : selectedChat?.messages || [];
 
@@ -110,14 +113,17 @@ export default function ChatPage() {
       content: msg.content,
       role: msg.role as "user" | "assistant",
       timestamp: new Date(msg.createdAt || Date.now()),
-      attachments: msg.experimental_attachments?.map(
-        (att: { name?: string; contentType?: string; url?: string }) => ({
-          name: att.name || "attachment",
-          type: att.contentType || "application/octet-stream",
-          size: 0,
-          url: att.url,
-        }),
-      ),
+      attachments:
+        msg.role === "user"
+          ? msg.experimental_attachments?.map(
+              (att: { name?: string; contentType?: string; url?: string }) => ({
+                name: att.name || "attachment",
+                type: att.contentType || "application/octet-stream",
+                size: 0,
+                url: att.url,
+              }),
+            )
+          : undefined,
     }));
 
     setChats((prevChats) => {
@@ -231,12 +237,8 @@ export default function ChatPage() {
       setInputValue("");
       setAttachedFiles([]);
 
-      // Generate a unique ID for the message
-      const messageId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-
       // Append message with attachments
       await append({
-        id: messageId,
         content: messageContent,
         role: "user",
         experimental_attachments: attachments,
@@ -376,21 +378,7 @@ export default function ChatPage() {
           <div className="p-6">
             <div className="mx-auto max-w-3xl space-y-4">
               {displayMessages.map((message) => (
-                <div key={message.id}>
-                  <ChatMessage message={message} />
-                  {message.attachments && message.attachments.length > 0 && (
-                    <div className="mt-2 ml-12 flex flex-wrap gap-2">
-                      {message.attachments.map((attachment, idx) => (
-                        <span
-                          className="text-muted-foreground bg-muted rounded px-2 py-1 text-xs"
-                          key={idx}
-                        >
-                          📎 {attachment.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <ChatMessage key={message.id} message={message} />
               ))}
               {status === "streaming" && (
                 <div className="text-muted-foreground flex items-center gap-2">
