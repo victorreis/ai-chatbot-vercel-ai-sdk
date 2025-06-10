@@ -1,32 +1,165 @@
 "use client";
 
-import { Plus, Send } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { Loader2, Plus, Send } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
-import { mockChats } from "@/__mocks__/chats.mocks";
 import { ChatFileUploadButton } from "@/components/ChatFileUploadButton";
 import { ChatHistory } from "@/components/ChatHistory";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatTextarea } from "@/components/ChatTextarea";
+import { ModelSelector } from "@/components/ModelSelector";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAvailableModels } from "@/hooks/useAvailableModels";
 import { layoutStyles } from "@/styles";
-import type { Chat } from "@/types/chat";
+import type { Chat, Message } from "@/types/chat";
 import { cn } from "@/utils/cn";
 
 export default function ChatPage() {
-  const [chats, setChats] = useState(mockChats);
-  const [selectedChatId, setSelectedChatId] = useState(mockChats[0]?.id);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string>("");
   const [inputValue, setInputValue] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [isProcessingTool, setIsProcessingTool] = useState(false);
+  const [selectedModel, setSelectedModel] =
+    useState<string>("gemini-2.0-flash");
   const username = "Guest User";
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const { availableModels } = useAvailableModels();
+
+  // Set default model when models are loaded
+  useEffect(() => {
+    if (
+      availableModels.length > 0 &&
+      !availableModels.some((m) => m.id === selectedModel)
+    ) {
+      setSelectedModel(availableModels[0]!.id);
+    }
+  }, [availableModels, selectedModel]);
+
+  const {
+    messages: aiMessages,
+    append,
+    reload,
+    status,
+    error,
+    setMessages,
+  } = useChat({
+    id: selectedChatId,
+    api: "/api/chat",
+    body: {
+      model: selectedModel,
+    },
+    generateId: () =>
+      `msg-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+    onError: (error) => {
+      console.error("Chat error:", error);
+      toast.error(
+        error.message || "An error occurred while processing your message",
+      );
+    },
+    onFinish: () => {
+      // Update local chat history
+      updateChatMessages();
+    },
+    onToolCall: ({ toolCall }) => {
+      // eslint-disable-next-line no-console
+      console.log("Tool called:", toolCall);
+      setIsProcessingTool(true);
+    },
+  });
+
   const selectedChat = chats.find((chat) => chat.id === selectedChatId);
-  const messages = selectedChat?.messages || [];
+
+  // Use AI messages when available, otherwise fall back to local chat messages
+  const displayMessages =
+    aiMessages.length > 0
+      ? aiMessages.map((msg) => ({
+          id: msg.id,
+          content: msg.content,
+          role: msg.role as "user" | "assistant",
+          timestamp: new Date(msg.createdAt || Date.now()),
+          attachments: msg.experimental_attachments?.map(
+            (att: {
+              name?: string;
+              pathname?: string;
+              contentType?: string;
+              url?: string;
+            }) => ({
+              name: att.name || att.pathname || "attachment",
+              type: att.contentType || "application/octet-stream",
+              size: 0,
+              url: att.url,
+            }),
+          ),
+        }))
+      : selectedChat?.messages || [];
+
+  // Sync AI messages with local chat state
+  const updateChatMessages = useCallback(() => {
+    if (!selectedChatId || aiMessages.length === 0) return;
+
+    const formattedMessages: Message[] = aiMessages.map((msg) => ({
+      id: msg.id,
+      content: msg.content,
+      role: msg.role as "user" | "assistant",
+      timestamp: new Date(msg.createdAt || Date.now()),
+      attachments: msg.experimental_attachments?.map(
+        (att: { name?: string; contentType?: string; url?: string }) => ({
+          name: att.name || "attachment",
+          type: att.contentType || "application/octet-stream",
+          size: 0,
+          url: att.url,
+        }),
+      ),
+    }));
+
+    setChats((prevChats) => {
+      const existingChat = prevChats.find((chat) => chat.id === selectedChatId);
+      if (existingChat) {
+        return prevChats.map((chat) =>
+          chat.id === selectedChatId
+            ? { ...chat, messages: formattedMessages, timestamp: new Date() }
+            : chat,
+        );
+      } else {
+        // Create new chat if it doesn't exist
+        const newChat: Chat = {
+          id: selectedChatId,
+          title:
+            formattedMessages[0]?.content.slice(0, 30) + "..." || "New Chat",
+          timestamp: new Date(),
+          messages: formattedMessages,
+        };
+        return [newChat, ...prevChats];
+      }
+    });
+  }, [aiMessages, selectedChatId]);
+
+  // Update chat messages when AI messages change
+  useEffect(() => {
+    updateChatMessages();
+  }, [aiMessages, updateChatMessages]);
+
+  // Initialize with a default chat
+  useEffect(() => {
+    if (chats.length === 0) {
+      const initialChat: Chat = {
+        id: `chat-${Date.now()}`,
+        title: "New Chat",
+        timestamp: new Date(),
+        messages: [],
+      };
+      setChats([initialChat]);
+      setSelectedChatId(initialChat.id);
+    }
+  }, [chats.length]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -41,68 +174,97 @@ export default function ChatPage() {
         });
       }
     }
-  }, [messages.length]);
+  }, [displayMessages.length, status]);
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim() && attachedFiles.length === 0) return;
+  // Reset tool processing state when not loading
+  useEffect(() => {
+    if (status !== "streaming") {
+      setIsProcessingTool(false);
+    }
+  }, [status]);
 
-    const newMessage = {
-      id: Date.now().toString(),
-      content: inputValue,
-      role: "user" as const,
-      timestamp: new Date(),
-      attachments: attachedFiles.map((file) => ({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-      })),
-    };
-
-    if (selectedChat) {
-      const updatedChat: Chat = {
-        ...selectedChat,
-        messages: [...selectedChat.messages, newMessage],
-        timestamp: new Date(),
-      };
-
-      setChats((prevChats) =>
-        prevChats.map((chat) =>
-          chat.id === selectedChatId ? updatedChat : chat,
-        ),
-      );
+  const handleSendMessage = async () => {
+    // Validate input
+    if (!inputValue.trim() && attachedFiles.length === 0) {
+      toast.error("Please enter a message or attach a file");
+      return;
     }
 
-    setInputValue("");
-    setAttachedFiles([]);
+    if (!selectedChatId) {
+      toast.error("Please select or create a chat first");
+      return;
+    }
 
-    // Simulate AI response
-    setTimeout(() => {
-      if (selectedChat) {
-        const aiResponse = {
-          id: (Date.now() + 1).toString(),
-          content:
-            "This is a mock AI response. The actual AI integration will be implemented later.",
-          role: "assistant" as const,
-          timestamp: new Date(),
-        };
+    try {
+      // Validate file types
+      const invalidFiles = attachedFiles.filter(
+        (file) =>
+          !file.type.startsWith("image/") && file.type !== "application/pdf",
+      );
 
-        setChats((prevChats) =>
-          prevChats.map((chat) =>
-            chat.id === selectedChatId
-              ? {
-                  ...chat,
-                  messages: [...chat.messages, aiResponse],
-                  timestamp: new Date(),
-                }
-              : chat,
-          ),
-        );
+      if (invalidFiles.length > 0) {
+        toast.error("Only PDF and image files are allowed");
+        return;
       }
-    }, 1000);
+
+      // Convert files to attachments
+      const attachments = await Promise.all(
+        attachedFiles.map(async (file) => {
+          // In a real app, you would upload the file to a server here
+          // For now, we'll create a data URL
+          const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          });
+
+          return {
+            url: dataUrl,
+            pathname: file.name,
+            contentType: file.type,
+          };
+        }),
+      );
+
+      // Clear input immediately for better UX
+      const messageContent = inputValue;
+      setInputValue("");
+      setAttachedFiles([]);
+
+      // Generate a unique ID for the message
+      const messageId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+
+      // Append message with attachments
+      await append({
+        id: messageId,
+        content: messageContent,
+        role: "user",
+        experimental_attachments: attachments,
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message. Please try again.");
+      // Restore input on error
+      setInputValue(inputValue);
+    }
   };
 
   const handleFileSelect = (files: FileList) => {
-    setAttachedFiles([...files]);
+    const fileArray = [...files];
+
+    // Validate file types
+    const validFiles = fileArray.filter(
+      (file) =>
+        file.type.startsWith("image/") || file.type === "application/pdf",
+    );
+
+    if (validFiles.length < fileArray.length) {
+      toast.error(
+        "Some files were skipped. Only PDF and image files are allowed.",
+      );
+    }
+
+    setAttachedFiles(validFiles);
   };
 
   const handleChatRename = (chatId: string, newTitle: string) => {
@@ -120,7 +282,15 @@ export default function ChatPage() {
     if (selectedChatId === chatId) {
       const remainingChat = chats.find((chat) => chat.id !== chatId);
       setSelectedChatId(remainingChat?.id || "");
+      // Clear AI messages when switching chats
+      setMessages([]);
     }
+  };
+
+  const handleChatSelect = (chatId: string) => {
+    setSelectedChatId(chatId);
+    // Clear messages when switching chats
+    setMessages([]);
   };
 
   return (
@@ -173,7 +343,7 @@ export default function ChatPage() {
             className="h-full"
             onChatDelete={handleChatDelete}
             onChatRename={handleChatRename}
-            onChatSelect={setSelectedChatId}
+            onChatSelect={handleChatSelect}
             selectedChatId={selectedChatId}
           />
         </div>
@@ -191,6 +361,12 @@ export default function ChatPage() {
             {selectedChat?.title || "Select a chat"}
           </h1>
           <div className="flex items-center gap-4">
+            <ModelSelector
+              availableModels={availableModels}
+              className="min-w-[160px]"
+              onModelChange={setSelectedModel}
+              selectedModel={selectedModel}
+            />
             <span className="text-muted-foreground text-sm">{username}</span>
             <ThemeSwitcher />
           </div>
@@ -199,9 +375,46 @@ export default function ChatPage() {
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
           <div className="p-6">
             <div className="mx-auto max-w-3xl space-y-4">
-              {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+              {displayMessages.map((message) => (
+                <div key={message.id}>
+                  <ChatMessage message={message} />
+                  {message.attachments && message.attachments.length > 0 && (
+                    <div className="mt-2 ml-12 flex flex-wrap gap-2">
+                      {message.attachments.map((attachment, idx) => (
+                        <span
+                          className="text-muted-foreground bg-muted rounded px-2 py-1 text-xs"
+                          key={idx}
+                        >
+                          📎 {attachment.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
+              {status === "streaming" && (
+                <div className="text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">
+                    {isProcessingTool
+                      ? "Processing file with PII detection..."
+                      : "AI is thinking..."}
+                  </span>
+                </div>
+              )}
+              {error && (
+                <div className="text-destructive bg-destructive/10 rounded-md p-3 text-sm">
+                  Error: {error.message}
+                  <Button
+                    className="ml-2"
+                    onClick={() => reload()}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
           </div>
@@ -229,13 +442,22 @@ export default function ChatPage() {
                   selectedFiles={attachedFiles}
                 />
                 <Button
-                  disabled={!inputValue.trim() && attachedFiles.length === 0}
+                  disabled={
+                    (!inputValue.trim() && attachedFiles.length === 0) ||
+                    status === "streaming"
+                  }
                   onClick={handleSendMessage}
                   size="icon"
                   variant="default"
                 >
-                  <Send className="h-4 w-4" />
-                  <span className="sr-only">Send message</span>
+                  {status === "streaming" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {status === "streaming" ? "Sending..." : "Send message"}
+                  </span>
                 </Button>
               </div>
             </div>

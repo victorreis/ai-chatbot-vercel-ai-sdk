@@ -7,6 +7,7 @@ export interface Message {
     name: string;
     type: string;
     size: number;
+    url?: string;
   }[];
 }
 
