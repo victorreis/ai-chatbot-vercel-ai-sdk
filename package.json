@@ -28,10 +28,14 @@
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
   },
   "dependencies": {
+    "@ai-sdk/google": "^1.2.19",
+    "@ai-sdk/openai": "^1.3.22",
+    "@ai-sdk/react": "^1.2.12",
     "@radix-ui/react-scroll-area": "^1.2.9",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@t3-oss/env-nextjs": "^0.13.6",
+    "ai": "^4.3.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "critters": "^0.0.23",
@@ -39,6 +43,7 @@
     "next": "15.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.0",
     "zod": "^3.25.51"
   },

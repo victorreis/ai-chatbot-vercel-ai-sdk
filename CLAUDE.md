@@ -119,15 +119,10 @@ src/services/ServiceName/
 
 ### Pending Implementation
 
-- ❌ Vercel AI SDK integration
-- ❌ OpenAI API connection
-- ❌ Server Actions for AI interactions
-- ❌ PII detection tools
 - ❌ Vercel KV for chat persistence
 - ❌ Authentication (Vercel Auth)
-- ❌ Real-time streaming responses
 - ❌ Error boundaries and loading states
-- ❌ Actual file processing for uploads
+- ❌ Actual file processing for uploads (OCR for images)
 - ❌ Test coverage
 
 ## Development Guidelines
@@ -211,9 +206,7 @@ AUTH_SECRET=
 
 ### Code Quality
 
-- **ALWAYS** run `npm run lint:fix` after making changes
-- Ensure TypeScript has no errors with `npm run typecheck`
-- Format code with `npm run format`
+- **ALWAYS** run `npm run lint:fix`, `npm run type-check` and `npm run format` after making changes
 - Write tests for new functionality
 - Use meaningful commit messages (conventional commits)
 - **NEVER** create a redundant comment that says the same as the variable/function/class name, like
