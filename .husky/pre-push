@@ -3,6 +3,12 @@ echo -e "🚀 Starting pre-push checks...\n"
 echo -e "\n📝 Type checking..."
 npm run type-check
 
+echo -e "\n🧪 Linting..."
+npm run lint
+
+echo -e "\n🧪 Formatting..."
+npm run format:check
+
 echo -e "\n🧪 Running tests..."
 npm test -- --passWithNoTests --ci --watchAll=false
 
