@@ -52,31 +52,45 @@ export function useChat({
 
   // Use AI messages when available, otherwise fall back to local chat messages
   const selectedChat = chats.find((chat) => chat.id === selectedChatId);
-  const displayMessages =
-    aiMessages.length > 0
-      ? aiMessages.map((msg) => ({
-          id: msg.id,
-          content: msg.content,
-          role: msg.role as "user" | "assistant",
-          timestamp: new Date(msg.createdAt || Date.now()),
-          attachments:
-            msg.role === "user"
-              ? msg.experimental_attachments?.map(
-                  (att: {
-                    name?: string;
-                    pathname?: string;
-                    contentType?: string;
-                    url?: string;
-                  }) => ({
-                    name: att.name || att.pathname || "attachment",
-                    type: att.contentType || "application/octet-stream",
-                    size: 0,
-                    url: att.url,
-                  }),
-                )
-              : undefined,
-        }))
-      : selectedChat?.messages || [];
+
+  const displayMessages = (() => {
+    if (aiMessages.length > 0) {
+      // When AI messages exist, combine welcome message with AI messages
+      const welcomeMessage = selectedChat?.messages.find((msg) =>
+        msg.id.startsWith("welcome-"),
+      );
+      const aiMessagesMapped = aiMessages.map((msg) => ({
+        id: msg.id,
+        content: msg.content,
+        role: msg.role as "user" | "assistant",
+        timestamp: new Date(msg.createdAt || Date.now()),
+        attachments:
+          msg.role === "user"
+            ? msg.experimental_attachments?.map(
+                (att: {
+                  name?: string;
+                  pathname?: string;
+                  contentType?: string;
+                  url?: string;
+                }) => ({
+                  name: att.name || att.pathname || "attachment",
+                  type: att.contentType || "application/octet-stream",
+                  size: 0,
+                  url: att.url,
+                }),
+              )
+            : undefined,
+      }));
+
+      // Include welcome message if it exists
+      return welcomeMessage
+        ? [welcomeMessage, ...aiMessagesMapped]
+        : aiMessagesMapped;
+    }
+
+    // No AI messages, use local chat messages
+    return selectedChat?.messages || [];
+  })();
 
   // Sync AI messages with local chat state
   const updateChatMessages = useCallback(() => {
@@ -103,9 +117,17 @@ export function useChat({
     setChats((prevChats) => {
       const existingChat = prevChats.find((chat) => chat.id === selectedChatId);
       if (existingChat) {
+        // Preserve welcome message when updating with AI messages
+        const welcomeMessage = existingChat.messages.find((msg) =>
+          msg.id.startsWith("welcome-"),
+        );
+        const allMessages = welcomeMessage
+          ? [welcomeMessage, ...formattedMessages]
+          : formattedMessages;
+
         return prevChats.map((chat) =>
           chat.id === selectedChatId
-            ? { ...chat, messages: formattedMessages, timestamp: new Date() }
+            ? { ...chat, messages: allMessages, timestamp: new Date() }
             : chat,
         );
       } else {

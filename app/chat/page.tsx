@@ -13,17 +13,31 @@ import { layoutStyles } from "@/styles";
 import type { Chat } from "@/types/chat";
 import { cn } from "@/utils/cn";
 
+const INITIAL_CHAT_MESSAGE =
+  "Welcome! I can analyze your documents for personally identifiable information (PII). Upload a file or ask me anything to get started.";
 export default function ChatPage() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string>("");
   const [inputValue, setInputValue] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
-  const [selectedModel, setSelectedModel] =
-    useState<string>("gemini-2.0-flash");
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    // Load from localStorage on initialization, fallback to default
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("selectedModel") || "gpt-4-turbo";
+    }
+    return "gpt-4-turbo";
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const username = "Guest User";
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { availableModels } = useAvailableModels();
+
+  // Function to update model and persist to localStorage
+  const handleModelChange = (modelId: string) => {
+    setSelectedModel(modelId);
+    localStorage.setItem("selectedModel", modelId);
+  };
 
   // Set default model when models are loaded
   useEffect(() => {
@@ -31,7 +45,8 @@ export default function ChatPage() {
       availableModels.length > 0 &&
       !availableModels.some((m) => m.id === selectedModel)
     ) {
-      setSelectedModel(availableModels[0]!.id);
+      const defaultModel = availableModels[0]!.id;
+      handleModelChange(defaultModel);
     }
   }, [availableModels, selectedModel]);
 
@@ -59,7 +74,14 @@ export default function ChatPage() {
         id: `chat-${Date.now()}`,
         title: "New Chat",
         timestamp: new Date(),
-        messages: [],
+        messages: [
+          {
+            id: `welcome-${Date.now()}`,
+            content: INITIAL_CHAT_MESSAGE,
+            role: "assistant",
+            timestamp: new Date(),
+          },
+        ],
       };
       setChats([initialChat]);
       setSelectedChatId(initialChat.id);
@@ -77,6 +99,8 @@ export default function ChatPage() {
       toast.error("Please select or create a chat first");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       // Validate file types
@@ -108,7 +132,9 @@ export default function ChatPage() {
       );
 
       // Clear input immediately for better UX
-      const messageContent = inputValue;
+      const messageContent =
+        inputValue.trim() ||
+        "Identify PIIs and separate by PII type, value and line where it was found.";
       setInputValue("");
       setAttachedFiles([]);
 
@@ -118,6 +144,8 @@ export default function ChatPage() {
       // Input is already restored by the hook on error
       setInputValue(inputValue);
       setAttachedFiles(attachedFiles);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -142,7 +170,14 @@ export default function ChatPage() {
       id: `chat-${Date.now()}`,
       title: "New Chat",
       timestamp: new Date(),
-      messages: [],
+      messages: [
+        {
+          id: `welcome-${Date.now()}`,
+          content: INITIAL_CHAT_MESSAGE,
+          role: "assistant",
+          timestamp: new Date(),
+        },
+      ],
     };
     setChats([newChat, ...chats]);
     setSelectedChatId(newChat.id);
@@ -186,7 +221,7 @@ export default function ChatPage() {
       <main className={cn(layoutStyles.main, "bg-section-main")}>
         <ChatHeader
           availableModels={availableModels}
-          onModelChange={setSelectedModel}
+          onModelChange={handleModelChange}
           selectedModel={selectedModel}
           title={selectedChat?.title || "Select a chat"}
           username={username}
@@ -195,6 +230,7 @@ export default function ChatPage() {
         <ChatMessagesArea
           error={error}
           isProcessingTool={isProcessingTool}
+          isSubmitting={isSubmitting}
           messages={displayMessages}
           onRetry={reload}
           ref={scrollAreaRef}
@@ -204,7 +240,7 @@ export default function ChatPage() {
         <ChatInput
           attachedFiles={attachedFiles}
           disabled={!inputValue.trim() && attachedFiles.length === 0}
-          isLoading={status === "streaming"}
+          isLoading={status === "streaming" || isSubmitting}
           onChange={setInputValue}
           onFileSelect={handleFileSelect}
           onSubmit={handleSendMessage}

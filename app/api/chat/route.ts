@@ -35,83 +35,130 @@ const piiDetectionTool = {
   parameters: z.object({
     attachmentIndex: z
       .number()
-      .min(1)
+      .min(0)
       .describe(
-        "The index of the attachment in the user's message to analyze (0-based)",
+        "The index of the attachment in the user's message to analyze (0-based, starting from 0)",
       ),
   }),
   execute: async ({ attachmentIndex }: { attachmentIndex: number }) => {
-    // Find the last user message with attachments
-    const userMessages = currentMessages.filter(
-      (m) =>
-        m.role === "user" &&
-        m.experimental_attachments &&
-        m.experimental_attachments.length > 0,
-    );
-    const lastUserMessage = userMessages.at(-1);
+    try {
+      devLog("PII Detection Tool called with index:", attachmentIndex);
 
-    if (!lastUserMessage || !lastUserMessage.experimental_attachments) {
-      return {
-        error: "No attachments found in the user's message",
-      };
-    }
+      // Find the last user message with attachments
+      const userMessages = currentMessages.filter(
+        (m) =>
+          m.role === "user" &&
+          m.experimental_attachments &&
+          m.experimental_attachments.length > 0,
+      );
+      const lastUserMessage = userMessages.at(-1);
 
-    const attachment =
-      lastUserMessage.experimental_attachments[attachmentIndex];
-    if (!attachment) {
-      return {
-        error: `No attachment found at index ${attachmentIndex}`,
-      };
-    }
-
-    const { pathname: fileName, contentType: fileType } = attachment;
-    devLog("PII Detection Tool executing", {
-      fileName,
-      fileType,
-      attachmentIndex,
-    });
-
-    // In a real implementation, you would process the actual file content
-    // For now, we'll analyze the message content as a placeholder
-    const fileContent = lastUserMessage.content;
-
-    const piiPatterns = {
-      ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
-      creditCard: /\b(?:\d[ -]*?){13,19}\b/g,
-      email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-      phone: /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
-      ipAddress: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
-      dateOfBirth: /\b(?:\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2})\b/g,
-      passport: /\b[A-Z]{1,2}\d{6,9}\b/g,
-      driverLicense: /\b[A-Z]{1,2}\d{5,8}\b/g,
-    };
-
-    const detectedPII: Record<string, string[]> = {};
-
-    for (const [type, pattern] of Object.entries(piiPatterns)) {
-      const matches = fileContent.match(pattern);
-      if (matches && matches.length > 0) {
-        detectedPII[type] = [...new Set(matches)];
+      if (!lastUserMessage || !lastUserMessage.experimental_attachments) {
+        devError("No attachments found in messages");
+        return {
+          error: "No attachments found in the user's message",
+        };
       }
+
+      devLog(
+        "Found attachments:",
+        lastUserMessage.experimental_attachments.length,
+      );
+
+      const attachment =
+        lastUserMessage.experimental_attachments[attachmentIndex];
+      if (!attachment) {
+        devError(
+          `No attachment at index ${attachmentIndex}, available: ${lastUserMessage.experimental_attachments.length}`,
+        );
+        return {
+          error: `No attachment found at index ${attachmentIndex}. Available attachments: ${lastUserMessage.experimental_attachments.length}`,
+        };
+      }
+      const { pathname: fileName, contentType: fileType } = attachment;
+      devLog("PII Detection Tool executing", {
+        fileName,
+        fileType,
+        attachmentIndex,
+      });
+
+      // Process the actual file content from the attachment
+      const { url } = attachment;
+      let fileContent = "";
+
+      // Check if it's an image file
+      if (fileType.startsWith("image/")) {
+        return {
+          fileName,
+          fileType,
+          hasPII: false,
+          detectedPII: {},
+          summary: `Cannot analyze image files with text-based PII detection. The AI model will analyze the image content directly.`,
+        };
+      }
+
+      try {
+        if (url.startsWith("data:")) {
+          // Extract content from data URL for text-based files
+          const base64Data = url.split(",")[1];
+          if (base64Data) {
+            fileContent = Buffer.from(base64Data, "base64").toString("utf8");
+          }
+        }
+      } catch (error) {
+        devError("Error extracting file content:", error);
+        return {
+          fileName,
+          fileType,
+          hasPII: false,
+          detectedPII: {},
+          summary: `Error processing file content. The AI model will analyze the file directly.`,
+        };
+      }
+
+      const piiPatterns = {
+        ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
+        creditCard: /\b(?:\d[ -]*?){13,19}\b/g,
+        email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+        phone: /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
+        ipAddress: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
+        dateOfBirth: /\b(?:\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2})\b/g,
+        passport: /\b[A-Z]{1,2}\d{6,9}\b/g,
+        driverLicense: /\b[A-Z]{1,2}\d{5,8}\b/g,
+      };
+
+      const detectedPII: Record<string, string[]> = {};
+
+      for (const [type, pattern] of Object.entries(piiPatterns)) {
+        const matches = fileContent.match(pattern);
+        if (matches && matches.length > 0) {
+          detectedPII[type] = [...new Set(matches)];
+        }
+      }
+
+      const hasPII = Object.keys(detectedPII).length > 0;
+
+      devLog("PII Detection results", {
+        fileName,
+        hasPII,
+        types: Object.keys(detectedPII),
+      });
+
+      return {
+        fileName,
+        fileType,
+        hasPII,
+        detectedPII,
+        summary: hasPII
+          ? `Found PII in ${fileName}: ${Object.keys(detectedPII).join(", ")}`
+          : `No PII detected in ${fileName}`,
+      };
+    } catch (error) {
+      devError("Error in PII detection tool:", error);
+      return {
+        error: `PII detection failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      };
     }
-
-    const hasPII = Object.keys(detectedPII).length > 0;
-
-    devLog("PII Detection results", {
-      fileName,
-      hasPII,
-      types: Object.keys(detectedPII),
-    });
-
-    return {
-      fileName,
-      fileType,
-      hasPII,
-      detectedPII,
-      summary: hasPII
-        ? `Found PII in ${fileName}: ${Object.keys(detectedPII).join(", ")}`
-        : `No PII detected in ${fileName}`,
-    };
   },
 };
 
@@ -187,7 +234,7 @@ export async function POST(request: Request) {
             id: "system-pii",
             role: "system" as const,
             content:
-              "When the user provides file attachments, analyze them for Personal Identifiable Information (PII) using the detectPII tool. Call the tool with attachmentIndex starting from 0 for each attachment.",
+              "The user has uploaded file attachments. When asked to analyze files for PII, use the detectPII tool with the appropriate attachment index (starting from 0).",
           },
           ...messages,
         ]
@@ -213,6 +260,9 @@ export async function POST(request: Request) {
       },
       onFinish: async ({ usage, finishReason }) => {
         devLog("Stream finished", { usage, finishReason });
+      },
+      onStepFinish: async ({ stepType, usage, finishReason }) => {
+        devLog("Step finished", { stepType, usage, finishReason });
       },
     });
 
