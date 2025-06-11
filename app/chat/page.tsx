@@ -138,7 +138,7 @@ export default function ChatPage() {
       setInputValue("");
       setAttachedFiles([]);
 
-      // Send message with attachments
+      // Send message with all attachments (including converted PDF pages)
       await sendMessage(messageContent, attachments);
     } catch {
       // Input is already restored by the hook on error

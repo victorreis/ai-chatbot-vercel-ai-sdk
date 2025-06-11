@@ -47,7 +47,14 @@ const piiDetectionTool = {
         fileName: `attachment-${attachmentIndex}`,
         fileType: "image/document",
         summary: `Please examine the uploaded file at index ${attachmentIndex} visually for PII detection. Look for names, email addresses, phone numbers, addresses, dates of birth, and other personally identifiable information.`,
-        instructions: `ANALYZE THIS FILE FOR PII:
+        instructions: `ANALYZE ALL ATTACHED FILES FOR PII:
+
+**CRITICAL FOR PDF DOCUMENTS**: 
+- PDFs often have multiple pages - you MUST examine EVERY SINGLE PAGE
+- Scroll through the entire document from beginning to end
+- Do NOT stop after the first page - continue through ALL pages
+- Look at headers, footers, and content on every page
+- PII can appear anywhere in the document (page 1, 2, 3, etc.)
 
 **PERSONAL IDENTIFIERS** (ALWAYS PII):
 - Any person's full name, first name, last name
@@ -79,20 +86,24 @@ const piiDetectionTool = {
 - Vehicle registration numbers
 - Any other personal identifiers
 
-RESPOND IN THIS EXACT FORMAT:
+RESPOND IN THIS EXACT FORMAT FOR ALL FILES:
 ## PII DETECTED:
 
 1. [Value]
 Type: [type]
-Location: [specific location like "line X in page Y" or "header section" or "top of page"]
+Location: [specific location like "page 1 header" or "page 2 middle section" etc.]
 
 2. [Value]
 Type: [type]
-Location: [specific location like "line X in page Y" or "header section" or "top of page"]
+Location: [specific location like "page 1 header" or "page 2 middle section" etc.]
 
-If no PII is found, respond with "NO PII DETECTED".
+If no PII is found in any file, respond with "NO PII DETECTED".
 
-IMPORTANT: Use the exact format above with numbered list, "Type:" and "Location:" labels.`,
+CRITICAL REMINDERS: 
+- For PDFs: EXAMINE ALL PAGES, not just the first one
+- Use the exact format above with numbered list, "Type:" and "Location:" labels
+- For multi-page documents, specify which page each PII item was found on
+- Scroll through and analyze the complete document comprehensively`,
       };
     } catch (error) {
       devError("Error in PII detection tool:", error);
@@ -167,6 +178,11 @@ export async function POST(request: Request) {
       lastMessage?.experimental_attachments &&
       lastMessage.experimental_attachments.length > 0;
 
+    // Check if PDFs are attached to provide special instructions
+    const hasPDFs = lastMessage?.experimental_attachments?.some(
+      (att) => att.contentType === "application/pdf",
+    );
+
     // Add system message for file attachments
     const messagesWithSystem = hasAttachments
       ? [
@@ -176,7 +192,20 @@ export async function POST(request: Request) {
             content: `The user has uploaded file attachments. When asked to analyze files for PII:
 
 1. FIRST use the detectPII tool with attachment index 0 to get PII detection instructions
-2. THEN examine each uploaded image/document visually for all types of personally identifiable information
+2. THEN examine ALL uploaded files thoroughly for personally identifiable information
+
+${
+  hasPDFs
+    ? `
+CRITICAL FOR PDF FILES:
+- PDFs contain multiple pages - you MUST scroll through and examine EVERY single page
+- Do NOT stop at the first page - continue through the entire document
+- Pay special attention to headers, footers, and content throughout ALL pages
+- Many PDFs have PII scattered across different pages (contact info on page 1, additional details on subsequent pages)
+`
+    : ""
+}
+
 3. Look carefully for names, email addresses, phone numbers, addresses, SSNs, and other PII
 4. Be thorough and strict - names and contact info in resumes/CVs ARE considered PII
 5. ALWAYS use this EXACT format for your response:
@@ -185,13 +214,13 @@ export async function POST(request: Request) {
 
 1. [Value]
 Type: [type]
-Location: [specific location like "line X in page Y" or "header section" or "top of page"]
+Location: [specific location like "page 1 header" or "page 2 middle section" etc.]
 
 2. [Value]
 Type: [type]
-Location: [specific location like "line X in page Y" or "header section" or "top of page"]
+Location: [specific location like "page 1 header" or "page 2 middle section" etc.]
 
-The detectPII tool will provide detailed instructions on what to look for. Follow the format exactly.`,
+CRITICAL: For multi-page documents, specify which page each PII was found on. Examine ALL pages thoroughly!`,
           },
           ...messages,
         ]
