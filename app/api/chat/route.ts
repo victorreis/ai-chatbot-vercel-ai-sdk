@@ -79,17 +79,20 @@ const piiDetectionTool = {
 - Vehicle registration numbers
 - Any other personal identifiers
 
-For EACH piece of PII found, provide:
-1. **PII Category**: (e.g., "Full Name", "Email Address", "Phone Number")
-2. **Value**: The actual value found
-3. **Location**: Where it appears in the document
-
-RESPOND IN THIS FORMAT:
+RESPOND IN THIS EXACT FORMAT:
 ## PII DETECTED:
 
-**[Category]**: [Value] - Found in: [Location/Context]
+1. [Value]
+Type: [type]
+Location: [specific location like "line X in page Y" or "header section" or "top of page"]
 
-If no PII is found, respond with "NO PII DETECTED".`,
+2. [Value]
+Type: [type]
+Location: [specific location like "line X in page Y" or "header section" or "top of page"]
+
+If no PII is found, respond with "NO PII DETECTED".
+
+IMPORTANT: Use the exact format above with numbered list, "Type:" and "Location:" labels.`,
       };
     } catch (error) {
       devError("Error in PII detection tool:", error);
@@ -176,9 +179,19 @@ export async function POST(request: Request) {
 2. THEN examine each uploaded image/document visually for all types of personally identifiable information
 3. Look carefully for names, email addresses, phone numbers, addresses, SSNs, and other PII
 4. Be thorough and strict - names and contact info in resumes/CVs ARE considered PII
-5. List every piece of PII found with its category, value, and location in the document
+5. ALWAYS use this EXACT format for your response:
 
-The detectPII tool will provide detailed instructions on what to look for.`,
+## PII DETECTED:
+
+1. [Value]
+Type: [type]
+Location: [specific location like "line X in page Y" or "header section" or "top of page"]
+
+2. [Value]
+Type: [type]
+Location: [specific location like "line X in page Y" or "header section" or "top of page"]
+
+The detectPII tool will provide detailed instructions on what to look for. Follow the format exactly.`,
           },
           ...messages,
         ]
