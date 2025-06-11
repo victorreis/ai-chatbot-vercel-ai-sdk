@@ -1,6 +1,6 @@
 "use client";
 
-import { Paperclip } from "lucide-react";
+import { Paperclip, Wrench } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/utils/cn";
@@ -49,6 +49,16 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === "user";
   const [timeString, setTimeString] = useState<string>("");
 
+  // Check if message content contains tool usage indicators
+  const hasToolUsage =
+    !isUser &&
+    (message.content.includes("detectPII") ||
+      message.content.includes("PII Detection Tool") ||
+      message.content.includes("## PII DETECTED:") ||
+      message.content.toLowerCase().includes("processing file") ||
+      message.content.toLowerCase().includes("analyzing") ||
+      message.content.toLowerCase().includes("pii analysis"));
+
   // Format time on client side only to avoid hydration mismatches
   useEffect(() => {
     setTimeString(
@@ -82,6 +92,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
               : "message-assistant border",
           )}
         >
+          {hasToolUsage && (
+            <div className="mb-2 flex items-center gap-2">
+              <div className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
+                <Wrench className="h-3 w-3" />
+                <span>PII Detection Tool Used</span>
+              </div>
+            </div>
+          )}
           <p className={messageStyles.text}>{message.content}</p>
         </div>
 

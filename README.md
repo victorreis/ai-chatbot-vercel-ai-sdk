@@ -98,18 +98,17 @@ The main objective of this project is to show some development skills through so
     - [x] Mock data for the chat messages history.
   - [x] Modern scrollbar styles
   - [x] Theme switcher (dark/light/system)
-- [ ] Implement the chat interactivity using Vercel AI SDK + OpenAI.
-  - [ ] Create a Server Action to send the user message with the file attachment and receive the AI generated text (using Vercel AI SDK for AI streaming + OpenAI).
-  - [ ] Create a Tool in the Server Action to extract PII (Personal Identifiable Information).
-  - [ ] Show appropriate loading states during AI processing.
-  - [ ] Display when tool actions are being executed (loading state).
-  - [ ] Add Error handling in the chat interface when the user message is empty, a server/tool error occurs, when the file attachment is not a PDF or image, when the information in the image/PDF is not valid etc.
+  - [x] AI model switcher (OpenAI/Gemini) (Gemini free version has limited capabilities)
+- [x] Implement the chat interactivity using Vercel AI SDK + OpenAI. (6 hours)
+  - [x] Create a Server Action to send the user message with the file attachment and receive the AI generated text (using Vercel AI SDK for AI streaming + OpenAI).
+  - [x] Create a Tool in the Server Action to extract PII (Personal Identifiable Information).
+  - [x] Show appropriate loading states during AI processing.
+  - [x] Display when tool actions are being executed (loading state).
+  - [x] Add Error handling in the chat interface when a server/tool error occurs, when the file attachment is not a PDF or image, when the information in the image/PDF is not valid etc.
 - [ ] Use Vercel KV for storage.
 - [ ] Use Vercel Auth for authentication.
 - [ ] Add unit tests.
 - [ ] Add snapshot tests.
-- [ ] Add git hooks (pre-commit, pre-push) with husky.
-- [ ] Improve eslint/typescript rules.
 - [ ] Implement Atomic Design folder structure.
 
 ## Setup
