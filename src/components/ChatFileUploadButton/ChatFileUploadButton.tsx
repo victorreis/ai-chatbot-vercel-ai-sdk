@@ -1,5 +1,5 @@
 import { Paperclip } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +17,15 @@ export function ChatFileUploadButton({
   multiple = true,
 }: ChatFileUploadButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [inputKey, setInputKey] = useState(0);
+
+  // Clear the file input when selected files are cleared
+  useEffect(() => {
+    if (selectedFiles.length === 0) {
+      // Force re-render of the input by changing its key
+      setInputKey((prev) => prev + 1);
+    }
+  }, [selectedFiles.length]);
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -25,6 +34,8 @@ export function ChatFileUploadButton({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       onFileSelect(e.target.files);
+      // Clear the input value to allow selecting the same file again
+      e.target.value = "";
     }
   };
 
@@ -33,6 +44,7 @@ export function ChatFileUploadButton({
       <input
         accept={accept}
         className="hidden"
+        key={inputKey}
         multiple={multiple}
         onChange={handleFileChange}
         ref={fileInputRef}
