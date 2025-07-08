@@ -43,6 +43,8 @@ The main objective of this project is to show some development skills through so
 - Formatters (editorconfig, prettier)
 - Storybook
 - Unit tests (Jest + React Testing Library)
+- conventional-commits (commitlint)
+- git hooks (husky: pre-commit, prepare-commit-message)
 - Usability
 - Responsivity
 - Clean Code
@@ -52,8 +54,6 @@ The main objective of this project is to show some development skills through so
 - DRY: “Do not Repeat Yourself”
   <!-- - Vercel KV -->
   <!-- - Vercel Auth -->
-  <!-- - git hooks (husky: pre-commit, prepare-commit-message) -->
-  <!-- - conventional-commits (commitizen) -->
   <!-- - Scaffolding (scaffdog) -->
   <!-- - Thematization -->
 
